@@ -12,6 +12,18 @@ With respect ot the “Library” database, write a SQL select statement to repo
 ```sql
 SELECT name FROM authors ORDER BY name;
 ```
+| name      |
+|-----------|
+| Buffy     |
+| Chauncey  |
+| Clareta   |
+| Fina      |
+| Jerrilyn  |
+| Mirabella |
+| Ned       |
+| Sioux     |
+| Sukey     |
+| Tanitansy |
 
 ## 2
 With respect to the “Library” database, write a SQL select statement to count the number of books authored by each person. Make sure to not ignore authors who have not published any book. Your SQL statement must produce a relation with schema [authorid, name, bookCount]. 
@@ -22,6 +34,18 @@ ON a.authorid = p.authorid
 GROUP BY a.authorid, a.name , p.authorid
 ORDER BY a.authorid;
 ```
+| authorid | name      | bookcount |
+|----------|-----------|-----------|
+| 1        | Jerrilyn  | 1         |
+| 3        | Sioux     | 1         |
+| 7        | Buffy     | 1         |
+| 2        | Fina      | 1         |
+| 8        | Clareta   | 1         |
+| 5        | Ned       | 1         |
+| 9        | Mirabella | 1         |
+| 6        | Chauncey  | 1         |
+| 4        | Sukey     | 1         |
+| 10       | Tanitansy | 1         |
 
 ## 3
 With respect to the “Library” database, write a SQL select statement to identify all the authors who published at least one ebook in 'PDF' format. Your SQL statement must produce a relation with schema [authorid, name]. 
@@ -32,6 +56,18 @@ ON a.authorid = p.authorid
 JOIN ebooks eb
 ON eb.bookid = p.bookid AND eb.format='PDF';
 ```
+| authorid | name      |
+|----------|-----------|
+| 1        | Jerrilyn  |
+| 2        | Fina      |
+| 3        | Sioux     |
+| 4        | Sukey     |
+| 5        | Ned       |
+| 6        | Chauncey  |
+| 7        | Buffy     |
+| 8        | Clareta   |
+| 9        | Mirabella |
+| 10       | Tanitansy |
 
 ## 4
 With respect to the “Library” database, write a SQL select statement to identify all the pairs of co-authors. Two individuals are co-authors if there is at least one book that lists both as authors. Identify each author by name. Do not report the same pair of authors more than once. Your SQL statement must produce a relation with schema [name1, name2]
@@ -45,6 +81,14 @@ WHERE p1.bookid = p2.bookid AND p1.authorid<>p2.authorid AND p1.authorid>p2.auth
 
 WHERE a1.authorid = t.at1 AND a2.authorid = t.at2;
 ```
+| name1     | name2    |
+|-----------|----------|
+| Sioux     | Jerrilyn |
+| Sioux     | Fina     |
+| Mirabella | Sioux    |
+| Sukey     | Sioux    |
+| Chauncey  | Sioux    |
+| Ned       | Sukey    |
 
 ## 5
 With respect to the “Library” database, write a SQL select statement to identify the id and name of authors that cite their own work. Do not report the same author more than once. Your SQL statement must produce a relation with schema [authorid, name]
@@ -66,6 +110,9 @@ FROM (
          ) t2
 WHERE t1.a1 = t2.a2 AND a.authorid = t1.a1 AND c.citedbookid = t2.cited AND c.citingbookid = t1.citing;
 ```
+| authorid | name  |
+|----------|-------|
+| 3        | Sioux |
 
 ## 6
 With respect to the “Library” database, write a SQL select statement to identify all the authors who never published an ebook (notice that the publication of regular books should not be taken into consideration). Your SQL statement must produce a relation with schema [authorid, name]
@@ -78,6 +125,11 @@ WHERE a.authorid = p.authorid AND
       p.bookid = eb.bookid
 );
 ```
+| authorid | name      |
+|----------|-----------|
+| 11       | rfsdf     |
+| 7        | Buffy     |
+| 10       | Tanitansy |
 
 ## 7
 With respect to the “Library” database, write a SQL select statement to identify all the authors who published more than five books. Your SQL statement must produce a relation with schema [authorid, name]
@@ -92,5 +144,7 @@ WHERE
     group by p.authorid
     )>=5;
 ```
-
+| authorid | name  |
+|----------|-------|
+| 3        | Sioux |
 
