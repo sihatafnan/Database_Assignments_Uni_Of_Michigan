@@ -5,7 +5,7 @@ This is an assignment issued by university Of Michigun.It's 'bout establishing t
 
 Or you can have a look at the DDL statements to get an idea about the Schema.
 
-Now , let's look at the proposed query and their sql code:
+Now , let's look at the proposed query and their sql code;The results are shown for the DML statements included in this repository. 
 
 ## 1
 With respect ot the “Library” database, write a SQL select statement to report all the authors’ names in alphabetical order. Make sure to not skip authors who have not published any book. Your SQL statement must produce a relation with schema [name]. 
