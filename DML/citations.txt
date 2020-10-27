@@ -1,0 +1,10 @@
+insert into citations (citingbookid, citedbookid) values (1, 2);
+insert into citations (citingbookid, citedbookid) values (2, 3);
+insert into citations (citingbookid, citedbookid) values (3, 7);
+insert into citations (citingbookid, citedbookid) values (4, 5);
+insert into citations (citingbookid, citedbookid) values (5, 6);
+insert into citations (citingbookid, citedbookid) values (6, 7);
+insert into citations (citingbookid, citedbookid) values (7, 3);
+insert into citations (citingbookid, citedbookid) values (8, 9);
+insert into citations (citingbookid, citedbookid) values (9, 3);
+insert into citations (citingbookid, citedbookid) values (10, 5);

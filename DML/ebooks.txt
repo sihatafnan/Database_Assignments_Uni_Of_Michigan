@@ -1,0 +1,10 @@
+insert into ebooks (bookid, format) values (1, 'PDF');
+insert into ebooks (bookid, format) values (2, 'PDF');
+insert into ebooks (bookid, format) values (3, 'PDF');
+insert into ebooks (bookid, format) values (4, 'PDF');
+insert into ebooks (bookid, format) values (5, 'PDF');
+insert into ebooks (bookid, format) values (6, 'PDF');
+insert into ebooks (bookid, format) values (7, 'PDF');
+insert into ebooks (bookid, format) values (8, 'PDF');
+insert into ebooks (bookid, format) values (9, 'PDF');
+insert into ebooks (bookid, format) values (10, 'PDF');

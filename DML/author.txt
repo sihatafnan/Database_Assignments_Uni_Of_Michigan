@@ -1,0 +1,11 @@
+insert into authors (authorid, name) values (1, 'Jerrilyn');
+insert into authors (authorid, name) values (2, 'Fina');
+insert into authors (authorid, name) values (3, 'Sioux');
+insert into authors (authorid, name) values (4, 'Sukey');
+insert into authors (authorid, name) values (5, 'Ned');
+insert into authors (authorid, name) values (6, 'Chauncey');
+insert into authors (authorid, name) values (7, 'Buffy');
+insert into authors (authorid, name) values (8, 'Clareta');
+insert into authors (authorid, name) values (9, 'Mirabella');
+insert into authors (authorid, name) values (10, 'Tanitansy');
+insert into authors (authorid, name) values (11, 'rfsdf');

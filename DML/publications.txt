@@ -1,0 +1,14 @@
+insert into publications (authorid, bookid) values (1, 1);
+insert into publications (authorid, bookid) values (2, 2);
+insert into publications (authorid, bookid) values (3, 3);
+insert into publications (authorid, bookid) values (4, 4);
+insert into publications (authorid, bookid) values (6, 6);
+insert into publications (authorid, bookid) values (8, 8);
+insert into publications (authorid, bookid) values (3, 1);
+insert into publications (authorid, bookid) values (3, 4);
+insert into publications (authorid, bookid) values (3, 2);
+insert into publications (authorid, bookid) values (3, 6);
+insert into publications (authorid, bookid) values (3, 7);
+insert into publications (authorid, bookid) values (4, 10);
+insert into publications (authorid, bookid) values (5, 10);
+insert into publications (authorid, bookid) values (9, 3);

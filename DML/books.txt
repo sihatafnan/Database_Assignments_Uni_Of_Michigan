@@ -1,0 +1,10 @@
+insert into books (bookid, title, usd_price) values (1, 'Rosabelle', 47);
+insert into books (bookid, title, usd_price) values (2, 'Maynard', 92);
+insert into books (bookid, title, usd_price) values (3, 'Kendrick', 53);
+insert into books (bookid, title, usd_price) values (4, 'Cindelyn', 69);
+insert into books (bookid, title, usd_price) values (5, 'Clementius', 47);
+insert into books (bookid, title, usd_price) values (6, 'Ilyssa', 10);
+insert into books (bookid, title, usd_price) values (7, 'Jeramie', 99);
+insert into books (bookid, title, usd_price) values (8, 'Nara', 21);
+insert into books (bookid, title, usd_price) values (9, 'Hervey', 19);
+insert into books (bookid, title, usd_price) values (10, 'Keri', 39);
