@@ -1,150 +1,155 @@
-# Library_Management_System_Assignment
-This is an assignment issued by university Of Michigun.It's 'bout establishing the backend part(database) and generating some query solely on a database tool.First look at the pretty simple ER diagram or the simplest:3
-
-![](BOOK_ERD.png)
-
-Or you can have a look at the DDL statements to get an idea about the Schema.
+# Employee Selection System
+This is an assignment issued by university Of Michigun.It's 'bout establishing the backend part(database) and generating some query solely on a database tool.First let's look at the 5 tables.You can find the DDL statements in the file section:
+**Candidates table**
+![](candidates.png)
+**Candidatesskill table**
+![](cs.png)
+**openpositions table**
+![](p.png)
+**positionrequirements table**
+![](pr.png)
+**skills table**
+![](skill.png)
 
 Now , let's look at the proposed query and their sql code;The results are shown for the DML statements included in this repository. 
 
 ## 1
-With respect ot the “Library” database, write a SQL select statement to report all the authors’ names in alphabetical order. Make sure to not skip authors who have not published any book. Your SQL statement must produce a relation with schema [name]. 
+Write a SQL select statement to identify all the candidates that are proficient in both C++ and Java. Your query should return a relation with schema (cid, name), sorted by (cid, name).
 ```sql
-SELECT name FROM authors ORDER BY name;
+SELECT DISTINCT cd.cid , cd.name
+FROM candidates cd , 
+(SELECT cs.cid FROM candidateskills cs WHERE cs.skill = 'Java') cpp,
+(SELECT cs.cid FROM candidateskills cs WHERE cs.skill = 'C++') java
+WHERE cd.cid = cpp.cid AND cd.cid = java.cid
+ORDER BY cd.cid , cd.name;
 ```
-| name      |
-|-----------|
-| Buffy     |
-| Chauncey  |
-| Clareta   |
-| Fina      |
-| Jerrilyn  |
-| Mirabella |
-| Ned       |
-| Sioux     |
-| Sukey     |
-| Tanitansy |
+| cid     | name    |
+| -------	| --------|
+|	2	|	Bob	|
+|	4	|	Tom	|
+|	5	|	Liz	|
+
 
 ## 2
-With respect to the “Library” database, write a SQL select statement to count the number of books authored by each person. Make sure to not ignore authors who have not published any book. Your SQL statement must produce a relation with schema [authorid, name, bookCount]. 
+Write a SQL select statement to report all the candidates with less than 3 distinct technical skills. Do not ignore Leo! Your query should return a relation with schema (cid, name), sorted by (cid, name).
 ```sql
-SELECT a.authorid , a.name , count(p.authorid) bookcount
-FROM authors a LEFT JOIN publications p
-ON a.authorid = p.authorid 
-GROUP BY a.authorid, a.name , p.authorid
-ORDER BY a.authorid;
+SELECT cd.cid , cd.name
+FROM candidates cd,
+(
+SELECT DISTINCT cd.cid , COUNT(cs.cid)
+FROM candidates cd LEFT JOIN candidateskills cs
+ON cd.cid = cs.cid
+GROUP BY cd.cid  ,cs.cid
+) poor_cd
+WHERE cd.cid = poor_cd.cid AND poor_cd.count<3
+ORDER BY cd.cid , cd.name; 
+
 ```
-| authorid | name      | bookcount |
-|----------|-----------|-----------|
-| 1        | Jerrilyn  | 1         |
-| 3        | Sioux     | 1         |
-| 7        | Buffy     | 1         |
-| 2        | Fina      | 1         |
-| 8        | Clareta   | 1         |
-| 5        | Ned       | 1         |
-| 9        | Mirabella | 1         |
-| 6        | Chauncey  | 1         |
-| 4        | Sukey     | 1         |
-| 10       | Tanitansy | 1         |
+| cid     | name    |
+| -------	| --------|
+|	1	|	Ada	|
+|	2	|	Bob	|
+|	3	|	Eve	|
+|	6	|	Leo	|
+
 
 ## 3
-With respect to the “Library” database, write a SQL select statement to identify all the authors who published at least one ebook in 'PDF' format. Your SQL statement must produce a relation with schema [authorid, name]. 
+Is it true that all C++ programmers are also proficient in either Java or Cobol (or both)? Write a SQL select statement find out. Your query should return an empty relation whenever the above hypothesis is satisfied.
+
+The following query will find  the candidates who is proficient in c++ but not in java and cobol.So , if the proposed hypothesis in the question is true , the query will return an empty relation.
 ```sql
-SELECT a.authorid , a.name
-FROM authors a JOIN publications p
-ON a.authorid = p.authorid
-JOIN ebooks eb
-ON eb.bookid = p.bookid AND eb.format='PDF';
+(
+(SELECT cs.cid ,cd.name FROM candidateskills cs,candidates cd WHERE cd.cid=cs.cid AND cs.skill='C++')
+EXCEPT
+(SELECT cs.cid ,cd.name FROM candidateskills cs,candidates cd WHERE cd.cid=cs.cid AND cs.skill='Java')
+)
+EXCEPT
+(SELECT cs.cid ,cd.name FROM candidateskills cs,candidates cd WHERE cd.cid=cs.cid AND cs.skill='COBOL'); 
 ```
-| authorid | name      |
-|----------|-----------|
-| 1        | Jerrilyn  |
-| 2        | Fina      |
-| 3        | Sioux     |
-| 4        | Sukey     |
-| 5        | Ned       |
-| 6        | Chauncey  |
-| 7        | Buffy     |
-| 8        | Clareta   |
-| 9        | Mirabella |
-| 10       | Tanitansy |
+| cid     | name    |
+| -------	| --------|
+|	1	|	Ada	|
 
 ## 4
-With respect to the “Library” database, write a SQL select statement to identify all the pairs of co-authors. Two individuals are co-authors if there is at least one book that lists both as authors. Identify each author by name. Do not report the same pair of authors more than once. Your SQL statement must produce a relation with schema [name1, name2]
+Write a SQL select statement to report id and name of all the candidates who have at least one skill that no one else has. Your query should return a relation with schema (cid, name), sorted by (cid, name).
 ```sql
-SELECT a1.name name1 , a2.name name2
-FROM authors a1,authors a2 ,
+SELECT DISTINCT cd.cid,cd.name FROM candidates cd , 
 
-(SELECT p1.authorid at1 , p2.authorid at2
-FROM publications p1 , publications p2
-WHERE p1.bookid = p2.bookid AND p1.authorid<>p2.authorid AND p1.authorid>p2.authorid) t
+(SELECT cs.skill FROM candidateskills cs
+GROUP BY cs.skill
+HAVING COUNT(cs.skill)=1) dist_skill ,
 
-WHERE a1.authorid = t.at1 AND a2.authorid = t.at2;
+candidateskills cs
+WHERE cd.cid = cs.cid AND cs.skill = dist_skill.skill
+ORDER BY cd.cid,cd.name; 
+
 ```
-| name1     | name2    |
-|-----------|----------|
-| Sioux     | Jerrilyn |
-| Sioux     | Fina     |
-| Mirabella | Sioux    |
-| Sukey     | Sioux    |
-| Chauncey  | Sioux    |
-| Ned       | Sukey    |
+| cid  | name |
+|----- |------|
+|	3 |	Eve |
+|	5 |	Liz |
 
 ## 5
-With respect to the “Library” database, write a SQL select statement to identify the id and name of authors that cite their own work. Do not report the same author more than once. Your SQL statement must produce a relation with schema [authorid, name]
+Write a SQL select statement to match each open position with all the suitable candidates. A candidate is suitable only if she possesses all the skills that the position requires. Your query should return a relation with schema (pid, employer, descr, cid, name), sorted by (pid, employer, descr, cid, name).
 ```sql
-SELECT DISTINCT a.authorid , a.name
-FROM (
-     SELECT p.authorid a1 , c.citingbookid citing
-     FROM publications p , citations c
-     WHERE p.bookid = c.citingbookid
-         ) t1
-    ,
-     authors a
-    ,
-     citations c ,
-     (
-     SELECT p.authorid a2 , c.citedbookid cited
-     FROM publications p , citations c
-     WHERE p.bookid = c.citedbookid
-         ) t2
-WHERE t1.a1 = t2.a2 AND a.authorid = t1.a1 AND c.citedbookid = t2.cited AND c.citingbookid = t1.citing;
+SELECT p.pid , p.employer , p.descr , cd.cid , cd.name
+FROM
+openpositions p ,candidates cd
+
+WHERE
+
+(SELECT COUNT(*) FROM positionrequirements WHERE pid = p.pid)
+=
+(SELECT COUNT(*)FROM candidateskills WHERE cid = cd.cid AND skill IN(SELECT skill FROM positionrequirements WHERE pid = p.pid)) 
+ORDER BY p.pid , p.employer , p.descr , cd.cid , cd.name; 
+
 ```
-| authorid | name  |
-|----------|-------|
-| 3        | Sioux |
+| pid     | employer|	descr               | cid     | name    |
+|---------|--------	|------------------------|---------|---------|
+|	1	|	IBM	|	Junior SWE	     |	1	|	Ada	|
+|	1	|	IBM	|	Junior SWE	     |	2	|	Bob	|
+|	1	|	IBM	|	Junior SWE	     |	4	|	Tom	|
+|	1	|	IBM	|	Junior SWE	     |	5	|	Liz	|
+|	2	|	HPE	|	System SWE	     |	2	|	Bob	|
+|	2	|	HPE	|	System SWE	     |	4	|	Tom	|
+|	2	|	HPE	|	System SWE	     |	5	|	Liz	|
+|	4	|	XZY	| COVID19	Vaccine tester	|	1	|	Ada	|
+|	4	|	XZY	| COVID19	Vaccine tester	|	2	|	Bob	|
+|	4	|	XZY	| COVID19	Vaccine tester	|	3	|	Eve	|
+|	4	|	XZY	| COVID19	Vaccine tester	|	4	|	Tom	|
+|	4	|	XZY	| COVID19	Vaccine tester	|	5	|	Liz	|
+|	4	|	XZY	| COVID19	Vaccine tester	|	6	|	Leo	|
+
 
 ## 6
-With respect to the “Library” database, write a SQL select statement to identify all the authors who never published an ebook (notice that the publication of regular books should not be taken into consideration). Your SQL statement must produce a relation with schema [authorid, name]
+Write a SQL select statement to identify, for each candidate, the skills where the candidate proficiency is above average. Compute the average proficiency with respect to all the other candidates; for the candidates that do not possess a certain skill, count their proficiency as zero. Your query should return a relation with schema (cid, name, skill, proficiency, avg_proficiency), sorted by (cid, skill).
 ```sql
-SELECT authorid , name
-FROM authors EXCEPT (
-SELECT DISTINCT a.authorid ,  a.name
-FROM authors a , publications p , ebooks eb
-WHERE a.authorid = p.authorid AND
-      p.bookid = eb.bookid
-);
+SELECT cs.cid , cd.name , cs.skill , cs.proficiency , sa.avg 
+FROM
+candidates cd,
+candidateskills cs,
+(SELECT cs.skill , (0.0 + sum(cs.proficiency))/( SELECT max(t.row_number) from (SELECT row_number() over()  FROM candidates) t)  avg
+FROM candidateskills cs
+GROUP BY cs.skill
+) sa
+WHERE cd.cid = cs.cid AND cs.skill = sa.skill
+ORDER BY 
+cs.cid , cs.skill; 
 ```
-| authorid | name      |
-|----------|-----------|
-| 11       | rfsdf     |
-| 7        | Buffy     |
-| 10       | Tanitansy |
+| cid     | name    |  skill  | proficiency  |	avg_proficiency     |
+|---------|---------|---------|--------------|------------------------|
+|	1	|	Ada	|	C++	|	7	     |	4.666666666666667	|
+|	1	|	Ada	|	SQL	|	8	     |	4.333333333333333	|
+|	2	|	Bob	|	C++	|	6	     |	4.666666666666667	|
+|	2	|	Bob	|	Java	|	9	     |	4.5	               |
+|	3	|	Eve	|   Python|	9	     |	1.5	               |
+|	4	|	Tom	|	C++	|	7	     |	4.666666666666667	|
+|	4	|	Tom	|	Java	|	9	     |	4.5	               |
+|	4	|	Tom	|	SQL	|	9	     |	4.333333333333333	|
+|	5	|	Liz	|	C++	|	8	     |	4.666666666666667	|
+|	5	|	Liz	|    COBOL|	7	     |	1.1666666666666667	|
+|	5	|	Liz	|	Java	|	9	     |	4.5	               |
+|	5	|	Liz	|  Matlab	|	5	     |	0.8333333333333334	|
+|	5	|	Liz	|	SQL	|	9	     |	4.333333333333333	|
 
-## 7
-With respect to the “Library” database, write a SQL select statement to identify all the authors who published more than five books. Your SQL statement must produce a relation with schema [authorid, name]
-```sql
-SELECT a.authorid , a.name
-FROM authors a
-WHERE
-(
-    SELECT COUNT(p.authorid)
-    FROM publications p
-    WHERE p.authorid = a.authorid
-    group by p.authorid
-    )>=5;
-```
-| authorid | name  |
-|----------|-------|
-| 3        | Sioux |
 
