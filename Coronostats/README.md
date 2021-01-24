@@ -106,8 +106,8 @@ INSERT INTO "time_outside" (id,start_time,end_time,people_id,public_place_id) VA
 INSERT INTO "time_outside" (id,start_time,end_time,people_id,public_place_id) VALUES (41,'2020-02-17 04:15:14','2020-10-08 23:06:28',18,93),(42,'2020-02-03 16:15:43','2020-11-25 03:43:56',26,46),(43,'2020-02-27 18:27:57','2020-04-06 22:03:30',23,87),(44,'2020-06-27 09:48:42','2020-04-16 00:20:33',53,51),(45,'2020-01-16 08:39:43','2020-09-13 13:11:18',80,97),(46,'2020-09-04 21:24:27','2020-04-09 21:18:01',26,61),(47,'2020-02-28 08:24:50','2020-06-01 03:51:08',28,88),(48,'2020-03-24 09:05:43','2021-01-09 13:26:40',85,48),(49,'2020-11-01 17:05:02','2021-02-13 08:00:38',24,65),(50'2020-03-17 20:05:52','2020-06-20 19:28:08',99,73);
 
 Database was populated with data taken from a past timestamps.We will try  to make some future predictions through the following queries:
-```
-How many people living in which location
+
+```How many people living in which location
 ```
 ```sql
 SELECT l.name , t.count
@@ -156,6 +156,281 @@ Sisile     |  12
 Hildagard  |  6
 Lindsy     |  12
 Shandy     |  13
+
+```
+Percentage of people who went outside in each location
+```
+```sql
+SELECT l.name as Location, COUNT(tow.people_id) as No_of_People_went_out 
+FROM people p , location l , time_outside tow
+WHERE p.id = tow.people_id AND tow.start_time IS NOT NULL AND l.id = (SELECT location_id FROM public_place pp WHERE tow.public_place_id = pp.id)
+GROUP BY l.name
+ORDER BY No_of_People_went_out;
+```
+location   |  no_of_people_went_out
+-----------|-----------------------
+Tim        |  2
+Shandy     |  4
+Sisile     |  4
+Hildagard  |  4
+Fair       |  6
+Lindsy     |  7
+Annnora    |  7
+Damara     |  8
+Corny      |  8
+
+```
+Percentage of covid affected people in each location
+```
+```sql
+SELECT l.name location_name , l.no_of_people , COUNT( DISTINCT ca.people_id) as no_of_affected,
+round(100.0 * COUNT( DISTINCT ca.people_id)/l.no_of_people,2) as affected_percentage 
+FROM corona_affected ca , location l ,people p
+WHERE p.location_id = l.id AND p.id = ca.people_id
+GROUP BY l.id , l.name,l.no_of_people;
+```
+location_name  |  no_of_people  |  no_of_affected  |  affected_percentage
+---------------|----------------|------------------|---------------------
+Annnora        |  12            |  5               |  41.67
+Tim            |  28            |  11              |  39.29
+Corny          |  13            |  8               |  61.54
+Paddie         |  49            |  7               |  14.29
+Damara         |  8             |  7               |  87.5
+Fair           |  69            |  4               |  5.8
+Sisile         |  70            |  5               |  7.14
+Hildagard      |  20            |  7               |  35
+Lindsy         |  76            |  7               |  9.21
+Shandy         |  70            |  6               |  8.57
+
+```
+Number of deaths due to covid in each location
+```
+```sql
+SELECT l.name ,  l.no_of_people ,  COUNT( DISTINCT ca.people_id) as Death_Count 
+FROM corona_affected ca , location l ,people p
+WHERE p.location_id = l.id AND p.id = ca.people_id AND 
+p.death_date BETWEEN ca.start_date AND ca.recover_date
+GROUP BY l.id , l.name,l.no_of_people;
+```
+name       |  no_of_people  |  death_count
+-----------|----------------|-------------
+Annnora    |  12            |  3
+Tim        |  28            |  5
+Corny      |  13            |  1
+Paddie     |  49            |  2
+Damara     |  8             |  3
+Fair       |  69            |  1
+Sisile     |  70            |  2
+Hildagard  |  20            |  3
+Lindsy     |  76            |  3
+
+```
+Percentage of deaths due to covid among the corona positive patients in each location
+```
+```sql
+SELECT a.location_name , a.no_of_affected , d.Death_Count , 
+round(100.0 * d.Death_Count / a.no_of_affected,2) as death_percentage_among_patients
+FROM
+(SELECT l.name , l.id , l.no_of_people ,  COUNT( DISTINCT ca.people_id) as Death_Count 
+FROM corona_affected ca , location l ,people p
+WHERE p.location_id = l.id AND p.id = ca.people_id 
+AND p.death_date BETWEEN ca.start_date AND ca.recover_date
+GROUP BY l.id , l.name,l.no_of_people) d
+,
+(SELECT l.name location_name , l.id, l.no_of_people , COUNT( DISTINCT ca.people_id) 
+as no_of_affected  ,100.0 * COUNT( DISTINCT ca.people_id)/l.no_of_people 
+as affected_percentage FROM corona_affected ca , location l ,people p
+WHERE p.location_id = l.id AND p.id = ca.people_id
+GROUP BY l.id , l.name,l.no_of_people) a
+
+WHERE a.id = d.id;
+```
+location_name  |  no_of_affected  |  death_count  |  death_percentage_among_patients
+---------------|------------------|---------------|---------------------------------
+Annnora        |  5               |  3            |  60
+Tim            |  11              |  5            |  45.45
+Corny          |  8               |  1            |  12.5
+Paddie         |  7               |  2            |  28.57
+Damara         |  7               |  3            |  42.86
+Fair           |  4               |  1            |  25
+Sisile         |  5               |  2            |  40
+Hildagard      |  7               |  3            |  42.86
+Lindsy         |  7               |  3            |  42.86
+
+```
+Rank of location according to the number of corona positive people
+```
+```sql
+SELECT tmp.location_name as Location , 
+RANK () OVER
+(
+	ORDER BY no_of_affected
+)
+Rank_by_no_of_affection
+FROM
+(
+SELECT l.name location_name , COUNT( DISTINCT ca.people_id) as no_of_affected 
+FROM corona_affected ca , location l ,people p
+WHERE p.location_id = l.id AND p.id = ca.people_id
+GROUP BY l.id , l.name,l.no_of_people
+) tmp;
+```
+location   |  rank_by_no_of_affection
+-----------|-------------------------
+Fair       |  1
+Annnora    |  2
+Sisile     |  2
+Shandy     |  4
+Damara     |  5
+Paddie     |  5
+Hildagard  |  5
+Lindsy     |  5
+Corny      |  9
+Tim        |  10
+
+```
+How many people went out to which place of different locations 
+```
+```sql
+SELECT pp.name as public_place , COUNT(p.id) No_of_Affected
+FROM public_place pp , people p
+WHERE p.location_id = pp.location_id
+GROUP BY pp.name ;
+```
+public_place                        |  no_of_affected
+------------------------------------|----------------
+461-9292 Tempor Rd.                 |  12
+282-2564 Parturient Avenue          |  11
+1455 Cum Street                     |  7
+P.O. Box 468, 3745 Blandit Av.      |  12
+160-2468 Sed, Avenue                |  14
+P.O. Box 581, 831 Et Street         |  12
+Ap #149-1202 Suspendisse Street     |  12
+4275 Non, Rd.                       |  8
+632-6360 Amet Street                |  9
+2085 Dui. Avenue                    |  7
+Ap #707-5662 Neque St.              |  8
+2712 Sed Street                     |  12
+1046 Eu, Street                     |  7
+147 Donec Avenue                    |  8
+P.O. Box 921, 2280 Cursus. Av.      |  7
+6469 Nunc St.                       |  7
+199-6675 Erat. Rd.                  |  8
+201-8941 Lectus. Rd.                |  9
+433-9771 Volutpat. Street           |  8
+9157 Nec, Avenue                    |  14
+5017 Sed Avenue                     |  12
+Ap #626-195 Lacus. St.              |  14
+P.O. Box 417, 9749 Nulla. Rd.       |  9
+P.O. Box 957, 4130 Aliquet. Avenue  |  12
+P.O. Box 221, 7818 Aliquam Ave      |  8
+5119 Lorem, Rd.                     |  7
+P.O. Box 961, 2118 Tincidunt St.    |  7
+9273 Risus Road                     |  7
+244-3071 Maecenas St.               |  7
+P.O. Box 889, 2301 Non Ave          |  12
+3726 Ac Av.                         |  11
+P.O. Box 134, 8755 Fusce St.        |  8
+2731 Phasellus St.                  |  7
+970 Luctus. Rd.                     |  11
+597-4797 Praesent St.               |  12
+P.O. Box 463, 3063 Sed Road         |  9
+P.O. Box 744, 3536 Et, Av.          |  12
+Ap #623-4798 Est, Avenue            |  14
+977-2968 Adipiscing, St.            |  14
+525 Felis, Rd.                      |  11
+7888 Interdum Road                  |  7
+P.O. Box 881, 9171 Justo. St.       |  12
+P.O. Box 156, 5033 Non St.          |  7
+P.O. Box 378, 5893 Fusce Street     |  9
+9624 Libero. Av.                    |  12
+772-3542 Quis, Ave                  |  7
+P.O. Box 164, 8913 Duis Ave         |  12
+P.O. Box 698, 2544 Dolor. Rd.       |  7
+9801 Quisque Avenue                 |  14
+P.O. Box 854, 3407 Non Avenue       |  7
+Ap #649-1879 Facilisis. Rd.         |  14
+9327 Cursus. Street                 |  12
+Ap #368-4021 Quis Road              |  8
+P.O. Box 518, 7300 Amet Road        |  11
+Ap #320-8190 Eget, Avenue           |  12
+P.O. Box 798, 4757 Neque. Rd.       |  12
+489-4087 Aenean Rd.                 |  11
+P.O. Box 536, 2974 Duis Road        |  9
+706-3019 Sit Street                 |  8
+P.O. Box 248, 6087 Magna Ave        |  11
+5888 Ut Road                        |  9
+1617 Magna. St.                     |  9
+5970 Ornare Street                  |  11
+821-1937 Cum Street                 |  11
+Ap #355-7943 Ut Avenue              |  8
+Ap #556-3242 Dui Street             |  11
+549-8421 At Rd.                     |  7
+P.O. Box 179, 5150 Urna Av.         |  12
+502-9285 Consectetuer Rd.           |  7
+7829 Pulvinar Ave                   |  14
+Ap #764-2285 Non Avenue             |  9
+1151 Aliquam Av.                    |  8
+Ap #881-2334 A, Rd.                 |  7
+Ap #646-266 Volutpat Av.            |  7
+P.O. Box 725, 2705 Feugiat. St.     |  7
+Ap #564-6546 Non, Avenue            |  7
+Ap #723-8182 Dictum Av.             |  8
+Ap #927-2643 Tellus, Ave            |  11
+Ap #826-7766 Eu, St.                |  9
+3806 Eu Rd.                         |  11
+901-6460 Ligula. Street             |  14
+887-5790 Fusce Av.                  |  8
+Ap #861-6338 Suspendisse St.        |  8
+5195 Convallis St.                  |  7
+Ap #425-8812 Iaculis Rd.            |  11
+356-8944 Rutrum Avenue              |  11
+749 Imperdiet Ave                   |  7
+P.O. Box 905, 2788 Bibendum Rd.     |  7
+Ap #322-8600 Feugiat Ave            |  8
+Ap #959-122 Nunc Street             |  14
+Ap #362-8237 Quisque Ave            |  8
+P.O. Box 547, 6877 Ornare Street    |  7
+583-2748 Nunc Street                |  11
+Ap #634-7257 Gravida St.            |  8
+P.O. Box 870, 313 Urna. Ave         |  8
+2879 Mus. St.                       |  9
+166-8750 Tincidunt, Avenue          |  9
+P.O. Box 866, 4091 Eu St.           |  7
+Ap #722-9896 Et St.                 |  12
+P.O. Box 354, 7975 Proin Rd.        |  8
+
+```
+Rank of locations based on death counts
+```
+```sql
+SELECT tmp.name as Location , 
+RANK () OVER
+(
+	ORDER BY Death_Count
+)
+Rank_by_Death_Count
+FROM
+(
+SELECT l.name ,  COUNT( DISTINCT ca.people_id) as Death_Count FROM corona_affected ca , location l ,people p
+WHERE p.location_id = l.id AND p.id = ca.people_id AND p.death_date BETWEEN ca.start_date AND ca.recover_date
+GROUP BY l.id , l.name
+) tmp
+ORDER BY Rank_by_Death_Count;
+```
+location   |  rank_by_death_count
+-----------|---------------------
+Fair       |  1
+Corny      |  1
+Sisile     |  3
+Paddie     |  3
+Lindsy     |  5
+Damara     |  5
+Annnora    |  5
+Hildagard  |  5
+Tim        |  9
+
+
 
 
 
