@@ -105,5 +105,57 @@ INSERT INTO "time_outside" (id,start_time,end_time,people_id,public_place_id) VA
 INSERT INTO "time_outside" (id,start_time,end_time,people_id,public_place_id) VALUES (31,'2020-10-26 14:27:53','2021-08-30 14:16:24',60,67),(32,'2020-02-25 22:31:09','2021-02-15 23:13:03',14,92),(33,'2020-03-18 14:02:48','2021-03-02 12:26:07',41,11),(34,'2020-02-28 10:12:43','2021-10-08 09:52:01',77,100),(35,'2020-07-20 05:14:57','2020-09-07 21:30:53',38,60),(36,'2020-06-02 15:57:10','2021-08-19 00:14:37',12,39),(37,'2020-06-26 11:25:45','2021-06-19 03:26:57',19,10),(38,'2020-03-19 13:23:43','2021-05-24 10:16:28',16,26),(39,'2020-04-25 10:33:43','2021-03-17 06:39:51',36,58),(40,'2020-03-05 07:48:34','2021-01-22 18:03:44',50,27);
 INSERT INTO "time_outside" (id,start_time,end_time,people_id,public_place_id) VALUES (41,'2020-02-17 04:15:14','2020-10-08 23:06:28',18,93),(42,'2020-02-03 16:15:43','2020-11-25 03:43:56',26,46),(43,'2020-02-27 18:27:57','2020-04-06 22:03:30',23,87),(44,'2020-06-27 09:48:42','2020-04-16 00:20:33',53,51),(45,'2020-01-16 08:39:43','2020-09-13 13:11:18',80,97),(46,'2020-09-04 21:24:27','2020-04-09 21:18:01',26,61),(47,'2020-02-28 08:24:50','2020-06-01 03:51:08',28,88),(48,'2020-03-24 09:05:43','2021-01-09 13:26:40',85,48),(49,'2020-11-01 17:05:02','2021-02-13 08:00:38',24,65),(50'2020-03-17 20:05:52','2020-06-20 19:28:08',99,73);
 
+Database was populated with data taken from a past timestamps.We will try  to make some future predictions through the following queries:
+```
+How many people living in which location
+```
+```sql
+SELECT l.name , t.count
+FROM location l , 
+(SELECT  p.location_id , COUNT(p.id)
+FROM location l , people p
+GROUP BY p.location_id
+) t
+WHERE t.location_id = l.id
+ORDER BY t.count DESC;
+```
+name       |  count
+-----------|-------
+Annnora    |  140
+Tim        |  120
+Paddie     |  120
+Damara     |  120
+Corny      |  110
+Lindsy     |  90
+Shandy     |  80
+Hildagard  |  80
+Sisile     |  70
+Fair       |  70
+
+```
+No of public places in each location
+```
+```sql
+SELECT l.name , t.count
+FROM location l,
+(SELECT pp.location_id , count(*)
+FROM public_place pp
+GROUP BY pp.location_id
+) t
+WHERE l.id = t.location_id;
+```
+name       |  count
+-----------|-------
+Annnora    |  10
+Tim        |  5
+Corny      |  15
+Paddie     |  2
+Damara     |  11
+Fair       |  14
+Sisile     |  12
+Hildagard  |  6
+Lindsy     |  12
+Shandy     |  13
+
 
 
