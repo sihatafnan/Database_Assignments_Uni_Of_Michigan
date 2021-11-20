@@ -44,7 +44,7 @@ ENG”. Column “zipcode” identifies the location where the job was offered (
 subject to discrimination (they are marked as “PP”, protected population) from all the others (who are marked as “GP”, general population). Below is a 0.001% random sample from the
 table.
 
-a) Does membership to the “protected” population affect the chances of a random candidate of being hired? Write a SQL query to compute the relative frequency of positive and negative
+**a)** Does membership to the “protected” population affect the chances of a random candidate of being hired? Write a SQL query to compute the relative frequency of positive and negative
 hiring decisions with respect to the two populations (“PP” and “GP”). Your query should adopt the following output-schema:
 
 | freq | hired | population |
@@ -62,7 +62,43 @@ ROUND(X,2)). All the frequencies related to a certain population must always sum
 population}. Run your query in PostgreSQL and report both the query and the observed result. Hint #1: consider using window functions! Hint #2: Test-drive your queries against a small
 subset of the data first, before moving to the real data set, it will save you a lot of time.
 
-b) For each of the two available positions, “ENTRY LEVEL SW ENG” and “ADVANCED LEVEL SW ENG”, compute the same four statistics as in point (a), but considering only the
+**b)** For each of the two available positions, “ENTRY LEVEL SW ENG” and “ADVANCED LEVEL SW ENG”, compute the same four statistics as in point (a), but considering only the
 candidates who applied for the given position. The relation produced by your SQL query should look this:
 
+| position           | freq | hired | population |
+| ------------------ | ---- | ----- | ---------- |
+| ENTRY LEVEL SW DEV | 0.55 | true  | GP         |
+| ENTRY LEVEL SW DEV | 0.45 | false | GP         |
+| ENTRY LEVEL SW DEV | 0.54 | true  | PP         |
+| ENTRY LEVEL SW DEV | 0.46 | false | PP         |
+| ADVANCED SW DEV    | 0.44 | true  | GP         |
+| ADVANCED SW DEV    | 0.56 | false | GP         |
+| ADVANCED SW DEV    | 0.43 | true  | PP         |
+| ADVANCED SW DEV    | 0.57 | false | PP         |
 
+In the example, the first two records state that 55% of the candidates from the general population (“GP”) who applied for the “entry-level” position were hired, while the remaining 45% were rejected. Records #3 and #4 state that 54% of the candidates from the protectedpopulation (“PP”) who applied for the “entry-level” position were hired, while the remainin 46% were rejected. Records #5 and #6 state that 44% of the candidates from the general population (“GP”) who applied for the “advanced” position were hired, while the remaining 66% were rejected. Records #7 and #8 state that 43% of the candidates from the protected population (“PP”) who applied for the “advanced” position were hired, while the remaining 57% were rejected. Once again, the numbers reported here are for illustration only and you will get different results with the real data. Your query must adopt the same schema as above and the same sorting order (order by position DESC, population, hired DESC). Your query must round the frequencies down to two digits of precision (you can use function ROUND(X,2)). All the frequencies related to a certain population and job position must always sum up to one. Your query must return exactly eight records, i.e. one record for each possible assignment to attributes {position, hired, population}. Run your query in PostgreSQL and report both the query and the observed result.
+
+**Solution**
+a)
+```sql
+select round(count(*)*1.0/t.total,2) as freq , t1.hired , t1.population
+from hr as t1 , (
+select population , count(*) as total from hr
+group by population
+) as t
+where t1.population=t.population group by t1.hired , t1.population,t.total
+order by population, hired desc
+;
+```
+b)
+```sql
+select t1.position , round(count(*)*1.0/t.total,2) as freq , t1.hired , t1.population
+from hr as t1 , (
+select population , position , count(*) as total from hr
+group by population,position
+) as t
+where t1.population=t.population and t1.position=t.position group by t1.position , t1.hired , t1.population,t.total
+order by population, hired desc
+;
+
+```
