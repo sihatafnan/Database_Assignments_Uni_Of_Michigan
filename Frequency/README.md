@@ -79,6 +79,7 @@ candidates who applied for the given position. The relation produced by your SQL
 In the example, the first two records state that 55% of the candidates from the general population (“GP”) who applied for the “entry-level” position were hired, while the remaining 45% were rejected. Records #3 and #4 state that 54% of the candidates from the protectedpopulation (“PP”) who applied for the “entry-level” position were hired, while the remainin 46% were rejected. Records #5 and #6 state that 44% of the candidates from the general population (“GP”) who applied for the “advanced” position were hired, while the remaining 66% were rejected. Records #7 and #8 state that 43% of the candidates from the protected population (“PP”) who applied for the “advanced” position were hired, while the remaining 57% were rejected. Once again, the numbers reported here are for illustration only and you will get different results with the real data. Your query must adopt the same schema as above and the same sorting order (order by position DESC, population, hired DESC). Your query must round the frequencies down to two digits of precision (you can use function ROUND(X,2)). All the frequencies related to a certain population and job position must always sum up to one. Your query must return exactly eight records, i.e. one record for each possible assignment to attributes {position, hired, population}. Run your query in PostgreSQL and report both the query and the observed result.
 
 **Solution**
+
 a)
 ```sql
 select round(count(*)*1.0/t.total,2) as freq , t1.hired , t1.population
